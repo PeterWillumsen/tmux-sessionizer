@@ -59,7 +59,7 @@ fn main() -> Result<(), TmsError> {
     });
     let cli_args = create_app();
 
-    match handle_sub_commands(cli_args).change_context(TmsError::CliError)? {
+    match handle_sub_commands(cli_args.get_matches()).change_context(TmsError::CliError)? {
         OptionGiven::Yes => return Ok(()),
         OptionGiven::No => {} // continue
     }

@@ -1,10 +1,12 @@
+use std::io;
 use std::{error::Error, fmt::Display};
 
 use crate::{
     configs::{Config, OldConfig},
     execute_tmux_command, ConfigError, Suggestion,
 };
-use clap::{Arg, ArgMatches, Command};
+use clap::{value_parser, Arg, ArgMatches, Command};
+use clap_complete::{generate, Shell};
 use error_stack::{IntoReport, Result, ResultExt};
 
 #[derive(Debug)]
@@ -23,8 +25,8 @@ pub enum OptionGiven {
     No,
 }
 
-pub(crate) fn create_app() -> ArgMatches {
-    Command::new("tmux-sessionizer")
+pub(crate) fn create_app() -> Command<'static> {
+    Command::new("tms")
         .author("Jared Moulton <jaredmoulton3@gmail.com>")
         .version(clap::crate_version!())
         .about("Scan for all git folders in specified directories, select one and open it as a new tmux session")
@@ -80,11 +82,24 @@ pub(crate) fn create_app() -> ArgMatches {
         .subcommand(Command::new("sessions")
             .about("Show running tmux sessions with asterisk on the current session")
         )
-        .get_matches()
+        .subcommand(Command::new("init")
+            .about("Generate shell completions")
+            .arg(Arg::new("shell")
+            .required(true)
+            .value_parser(value_parser!(Shell))
+        )
+    )
 }
 
 pub(crate) fn handle_sub_commands(cli_args: ArgMatches) -> Result<OptionGiven, CliError> {
     match cli_args.subcommand() {
+        Some(("init", args)) => {
+            if let Some(generator) = args.get_one::<Shell>("shell") {
+                let mut cmd = create_app();
+                generate(*generator, &mut cmd, "tms", &mut io::stdout());
+            };
+            Ok(OptionGiven::Yes)
+        }
         Some(("config", sub_cmd_matches)) => {
             let defaults = confy::load::<Config>("tms");
             let mut defaults = match defaults {

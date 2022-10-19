@@ -33,6 +33,7 @@ OPTIONS:
 SUBCOMMANDS:
     config      Configure the defaults for search paths and excluded directories
     help        Print this message or the help of the given subcommand(s)
+    init        Generate shell completions
     kill        Kill the current tmux session and jump to another
     sessions    Show running tmux sessions with asterisk on the current session
 ```
