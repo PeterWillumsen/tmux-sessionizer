@@ -215,10 +215,9 @@ fn find_repos(
     while let Some(file) = to_search.pop_front() {
         if !excluded_dirs.contains(&file.file_name().unwrap().to_string()?) {
             if let Ok(repo) = git2::Repository::open(file.clone()) {
-                let name = if let Some(true) = display_full_path {
-                    file.to_string()?
-                } else {
-                    file.file_name().unwrap().to_string()?
+                let name = match display_full_path {
+                    Some(true) => file.to_string()?,
+                    _ => file.file_name().unwrap().to_string()?,
                 };
                 repos.insert_repo(name, repo);
             } else if file.is_dir() {
